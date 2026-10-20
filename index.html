@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>So‘z yodlash</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1b1f2a;--mu:#6b7280;--pr:#4f46e5;--prt:#fff;--ok:#16a34a;--no:#dc2626;--bd:#e5e7eb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12141c;--card:#1c1f2b;--tx:#eceef5;--mu:#9aa1b2;--pr:#818cf8;--prt:#12141c;--ok:#4ade80;--no:#f87171;--bd:#2c3040}}
+:root[data-theme="dark"]{--bg:#12141c;--card:#1c1f2b;--tx:#eceef5;--mu:#9aa1b2;--pr:#818cf8;--prt:#12141c;--ok:#4ade80;--no:#f87171;--bd:#2c3040}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:640px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.5rem;margin:0 0 4px}h2{font-size:1.2rem;margin:0}
+.mu{color:var(--mu);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:12px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:9px 14px}
+button.p{background:var(--pr);color:var(--prt);border-color:var(--pr);font-weight:600}
+button.g{border:none;background:none;color:var(--mu)}
+button:disabled{opacity:.5}
+input,textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:10px;margin:6px 0}
+textarea{min-height:200px;resize:vertical}
+.set{cursor:pointer}.set:hover{border-color:var(--pr)}
+.bar{height:6px;background:var(--bd);border-radius:9px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;background:var(--ok)}
+.fc{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;font-size:1.4rem;cursor:pointer;user-select:none;padding:24px}
+.fc small{font-size:.85rem;color:var(--mu);margin-top:12px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 18%,transparent)}
+.opt.no{border-color:var(--no);background:color-mix(in srgb,var(--no) 18%,transparent)}
+.fb{font-weight:600;margin:8px 0}.ok-t{color:var(--ok)}.no-t{color:var(--no)}
+.w{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--bd)}
+.w:last-child{border:0}.lv{font-size:.75rem;color:var(--mu);white-space:nowrap}
+.big{font-size:1.15rem;margin:6px 0 14px}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var sets=[],view={n:'home'},S=null;
+try{sets=JSON.parse(localStorage.getItem('soz_sets')||'[]')}catch(e){sets=[]}
+function save(){try{localStorage.setItem('soz_sets',JSON.stringify(sets))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function $(id){return document.getElementById(id)}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function parse(t){var out=[],bad=0;t.split('\n').forEach(function(l){l=l.trim();if(!l)return;var m=l.match(/\t|\s[-–—]\s|[=:;|]|-/);if(!m){bad++;return}var w=l.slice(0,m.index).trim(),d=l.slice(m.index+m[0].length).trim();if(w&&d)out.push({w:w,d:d,l:0});else bad++});return{out:out,bad:bad}}
+function cur(){return sets.find(function(s){return s.id===view.id})}
+function go(n,id){view={n:n,id:id};render()}
+function render(){var a=$('app');
+if(view.n==='home'){
+var h='<h1>So‘z yodlash</h1><p class="mu">Inglizcha so‘zlarni bo‘limlarga ajrating va yodlang.</p><button class="p" onclick="go(\'new\')">+ Yangi bo‘lim</button>';
+if(!sets.length)h+='<div class="card mu">Hozircha bo‘limlar yo‘q. Birinchi bo‘limni yarating.</div>';
+sets.forEach(function(s){var k=s.words.filter(function(w){return w.l>=4}).length,p=s.words.length?Math.round(k/s.words.length*100):0;
+h+='<div class="card set" onclick="go(\'set\','+s.id+')"><div class="row sp"><h2>'+esc(s.name)+'</h2><span class="mu">'+s.words.length+' ta so‘z</span></div><div class="bar"><i style="width:'+p+'%"></i></div><div class="mu">Yodlangan: '+p+'%</div></div>'});
+a.innerHTML=h}
+else if(view.n==='new'){
+a.innerHTML='<button class="g" onclick="go(\'home\')">← Orqaga</button><h1>Yangi bo‘lim</h1><input id="nm" placeholder="Bo‘lim nomi (masalan: Unit 1)"><p class="mu">Har bir qatorga bitta so‘z: <b>word - definition</b>. 10, 20 yoki undan ko‘p so‘zni birdan joylashingiz mumkin. Ajratgich: <b>-</b>, <b>=</b>, <b>:</b> yoki Tab.</p><textarea id="ws" placeholder="apple - a round red or green fruit\nbrave - ready to face danger\nlaugh - to make sounds that show you are happy"></textarea><div id="pv" class="mu"></div><button class="p" onclick="create()">Yaratish</button>';
+$('ws').oninput=function(){var r=parse(this.value);$('pv').textContent=r.out.length+' ta so‘z tayyor'+(r.bad?' · '+r.bad+' ta qator o‘qilmadi':'')}}
+else if(view.n==='set'){var s=cur();if(!s)return go('home');
+var h='<button class="g" onclick="go(\'home\')">← Bo‘limlar</button><div class="row sp"><h1>'+esc(s.name)+'</h1><button class="g" onclick="del()">O‘chirish</button></div><p class="mu">'+s.words.length+' ta so‘z</p>';
+var dis=s.words.length<1?' disabled':'',dis2=s.words.length<2?' disabled':'';
+h+='<div class="row"><button class="p"'+dis+' onclick="start(\'fc\')">Kartochkalar</button><button class="p"'+dis2+' onclick="start(\'mc\')">Test</button><button class="p"'+dis+' onclick="start(\'ty\')">Yozish</button></div>';
+h+='<div class="card"><b>So‘z qo‘shish</b><textarea id="ws" style="min-height:120px" placeholder="word - definition"></textarea><div id="pv" class="mu"></div><button onclick="addw()">Qo‘shish</button></div><div class="card"><b>So‘zlar</b>';
+s.words.forEach(function(w,i){h+='<div class="w"><div><b>'+esc(w.w)+'</b><div class="mu">'+esc(w.d)+'</div></div><div class="row"><span class="lv">'+w.l+'/5</span><button class="g" onclick="rm('+i+')">✕</button></div></div>'});
+a.innerHTML=h+'</div>';
+$('ws').oninput=function(){var r=parse(this.value);$('pv').textContent=r.out.length+' ta so‘z tayyor'+(r.bad?' · '+r.bad+' ta qator o‘qilmadi':'')}}
+else if(view.n==='play')play()}
+function create(){var n=$('nm').value.trim(),r=parse($('ws').value);if(!n)return alert('Bo‘lim nomini kiriting');if(!r.out.length)return alert('Kamida bitta so‘z kiriting');
+var id=Date.now();sets.unshift({id:id,name:n,words:r.out});save();go('set',id)}
+function addw(){var r=parse($('ws').value);if(!r.out.length)return;var s=cur();s.words=s.words.concat(r.out);save();render()}
+function rm(i){cur().words.splice(i,1);save();render()}
+function del(){if(confirm('Bo‘limni o‘chirasizmi?')){sets=sets.filter(function(s){return s.id!==view.id});save();go('home')}}
+function start(mode){var s=cur(),w=s.words.slice().sort(function(a,b){return a.l-b.l||Math.random()-.5}).slice(0,10);
+S={mode:mode,q:shuf(w),done:0,total:w.length,ok:0,flip:false,ans:null};view.n='play';render()}
+function mark(w,good){w.l=good?Math.min(5,w.l+1):Math.max(0,w.l-1);save()}
+function next(good){var w=S.q.shift();mark(w,good);if(good)S.ok++;else S.q.push(w);if(good)S.done++;S.flip=false;S.ans=null;render()}
+function play(){var a=$('app'),h='<div class="row sp"><button class="g" onclick="go(\'set\','+view.id+')">✕ Chiqish</button><span class="mu">'+S.done+' / '+S.total+'</span></div><div class="bar"><i style="width:'+(S.done/S.total*100)+'%"></i></div>';
+if(!S.q.length){var set=cur();h+='<div class="card" style="text-align:center"><h2>Tugadi! 🎉</h2><p class="mu">Siz '+S.total+' ta so‘zni takrorladingiz.</p><button class="p" onclick="start(\''+S.mode+'\')">Yana</button> <button onclick="go(\'set\','+view.id+')">Bo‘limga qaytish</button></div>';a.innerHTML=h;return}
+var w=S.q[0];
+if(S.mode==='fc'){
+h+='<div class="card fc" onclick="S.flip=!S.flip;render()">'+(S.flip?'<div class="big"><b>'+esc(w.w)+'</b></div><div>'+esc(w.d)+'</div>':'<div>'+esc(w.d)+'</div>')+'<small>'+(S.flip?'':'Javobni ko‘rish uchun bosing')+'</small></div>';
+if(S.flip)h+='<div class="row"><button style="flex:1" onclick="next(false)">Bilmadim</button><button class="p" style="flex:1" onclick="next(true)">Bildim</button></div>'}
+else if(S.mode==='mc'){
+if(!S.opts){var o=shuf(cur().words.filter(function(x){return x!==w})).slice(0,3).map(function(x){return x.w});o.push(w.w);S.opts=shuf(o)}
+h+='<div class="card"><div class="mu">Qaysi so‘z?</div><div class="big">'+esc(w.d)+'</div>';
+S.opts.forEach(function(o,i){var c='';if(S.ans!==null){if(o===w.w)c=' ok';else if(i===S.ans)c=' no'}
+h+='<button class="opt'+c+'" '+(S.ans!==null?'disabled':'')+' onclick="pick('+i+')">'+esc(o)+'</button>'});
+h+='</div>';if(S.ans!==null)h+='<button class="p" onclick="S.opts=null;next(S.opts0)">Davom etish</button>'}
+else{
+h+='<div class="card"><div class="mu">Inglizcha so‘zni yozing</div><div class="big">'+esc(w.d)+'</div>';
+if(S.ans===null)h+='<input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="So‘z..."><button class="p" onclick="chk()">Tekshirish</button> <button class="g" onclick="S.ans=\'\';S.bad=true;render();auto(false)">Bilmayman</button>';
+else h+='<div class="fb '+(S.bad?'no-t':'ok-t')+'">'+(S.bad?'Noto‘g‘ri. To‘g‘ri javob: ':'To‘g‘ri! ')+'<b>'+esc(w.w)+'</b></div>'+(S.bad?'<div class="mu">Sizning javobingiz: '+esc(S.ans||'—')+'</div>':'')+'<button class="p" onclick="S.opts=null;next(!S.bad)">Davom etish</button>';
+h+='</div>'}
+a.innerHTML=h;var i=$('in');if(i){i.focus();i.onkeydown=function(e){if(e.key==='Enter')chk()}}
+var nb=a.querySelector('button.p');if(S.mode==='ty'&&S.ans!==null){document.onkeydown=function(e){if(e.key==='Enter'&&nb)nb.click()}}else document.onkeydown=null}
+function auto(g){var t=S.q[0];setTimeout(function(){if(view.n==='play'&&S&&S.q[0]===t&&S.ans!==null){S.opts=null;next(g)}},g?500:1000)}
+function pick(i){var w=S.q[0];S.ans=i;S.opts0=S.opts[i]===w.w;render();auto(S.opts0)}
+function chk(){var v=$('in').value.trim(),w=S.q[0];S.ans=v;S.bad=v.toLowerCase()!==w.w.toLowerCase();render();auto(!S.bad)}
+render();
+</script>
+</body>
+</html>
